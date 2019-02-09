@@ -6,6 +6,8 @@ class AI:
         print("preprocess")
         pass
 
+
+
     def pick(self, world):
         print("pick")
         pass
