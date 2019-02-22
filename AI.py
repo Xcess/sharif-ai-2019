@@ -40,22 +40,23 @@ class AI:
         self.final_posisions.append(world.map.get_cell(row_max,column_min))
         self.final_posisions.append (world.map.get_cell(row_max,column_max))
         valid_flag = 0
-        while falid_flag = 0:
-            falid_flag = 1
+
+        while valid_flag == 0:
+            valid_flag = 1
             for i in range(4):
-                if final_posisions[i].is_wall:
-                    falid_flag = 0
+                if self.final_posisions[i].is_wall:
+                    valid_flag = 0
                     row_change = 0
                     column_change = 0
-                    if final_posisions[i].row > 15:
+                    if self.final_posisions[i].row < 15:
                         row_change = 1
                     else:
                         row_change = -1
-                    if final_posisions[i].column > 15:
+                    if self.final_posisions[i].column < 15:
                         column_change = 1
                     else:
                         column_change = -1
-                    final_posisions[i] = world.map.get_cell(final_posisions[i].row+row_change,final_posisions[i].rowcolumn+column_change)
+                    self.final_posisions[i] = world.map.get_cell(self.final_posisions[i].row+row_change,self.final_posisions[i].column+column_change)
 
 
 
