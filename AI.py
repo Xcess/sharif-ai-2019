@@ -5,9 +5,9 @@ from random import randint
 
 class AI:
     pick_heros = [Model.HeroName.BLASTER,
+                Model.HeroName.SENTRY,
                 Model.HeroName.BLASTER,
-                Model.HeroName.BLASTER,
-                Model.HeroName.BLASTER]
+                Model.HeroName.SENTRY]
     final_posisions = []
     attack_targets = []
     def preprocess(self, world):
@@ -60,7 +60,6 @@ class AI:
 
 
 
-
     def pick(self, world):
         print("pick")
         # hero_names = [hero_name for hero_name in Model.HeroName]  
@@ -87,11 +86,19 @@ class AI:
 
     def action(self, world):
         for hero in world.my_heroes:
-            for enemy in world.opp_heroes:
-                if world.manhattan_distance(hero.current_cell, enemy.current_cell) < 8:
-                    world.cast_ability(hero=hero, ability=hero.get_ability(Model.AbilityName.BLASTER_BOMB), cell=enemy.current_cell)
-                if world.manhattan_distance(hero.current_cell, enemy.current_cell) < 6:
-                    world.cast_ability(hero=hero, ability=hero.get_ability(Model.AbilityName.BLASTER_ATTACK), cell=enemy.current_cell)
+            if hero.hero_name== Model.HeroName.SENTRY
+                for enemy in world.opp_heroes:
+                    # if world.manhattan_distance(hero.current_cell, enemy.current_cell) < 8:
+                        world.cast_ability(hero=hero, ability=hero.get_ability(Model.AbilityName.SENTRY_RAY), cell=enemy.current_cell)
+                    # if world.manhattan_distance(hero.current_cell, enemy.current_cell) < 6:
+                    #     world.cast_ability(hero=hero, ability=hero.get_ability(Model.AbilityName.BLASTER_ATTACK), cell=enemy.current_cell)
+            if hero.hero_name== Model.HeroName.BLASTER:
+                 for enemy in world.opp_heroes:
+                    if world.manhattan_distance(hero.current_cell, enemy.current_cell) < 8:
+                        world.cast_ability(hero=hero, ability=hero.get_ability(Model.AbilityName.BLASTER_BOMB), cell=enemy.current_cell)
+                    if world.manhattan_distance(hero.current_cell, enemy.current_cell) < 6:
+                        world.cast_ability(hero=hero, ability=hero.get_ability(Model.AbilityName.BLASTER_ATTACK), cell=enemy.current_cell)
+
         # for hero in world.my_heroes:
         # no = 0
         # for hero in world.my_heroes:
