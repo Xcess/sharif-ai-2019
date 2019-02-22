@@ -25,14 +25,14 @@ class AI:
                 column_max = cell.column
             if cell.column < column_min:
                 column_min = cell.column 
-            print("row_min")
-            print(row_min)
-            print("column_min")
-            print(column_min)
-            print("row_max")
-            print(row_max)
-            print("column_max")
-            print(column_max)
+            # print("row_min")
+            # print(row_min)
+            # print("column_min")
+            # print(column_min)
+            # print("row_max")
+            # print(row_max)
+            # print("column_max")
+            # print(column_max)
 
         self.final_posisions.append(world.map.get_cell(row_min,column_min))
         self.final_posisions.append(world.map.get_cell(row_min,column_max))
@@ -65,8 +65,15 @@ class AI:
             no = no + 1
 
     def action(self, world):
-        no = 0
         for hero in world.my_heroes:
-            world.cast_ability(hero=hero, ability=hero.get_ability(Model.AbilityName.BLASTER_BOMB), cell=self.attack_targets[no])
-            world.cast_ability(hero=hero, ability=hero.get_ability(Model.AbilityName.BLASTER_ATTACK), cell=self.attack_targets[no])
-            no = no + 1
+            for enemy in world.opp_heroes:
+                if world.manhattan_distance(hero.current_cell, enemy.current_cell) < 8:
+                    world.cast_ability(hero=hero, ability=hero.get_ability(Model.AbilityName.BLASTER_BOMB), cell=enemy.current_cell)
+                if world.manhattan_distance(hero.current_cell, enemy.current_cell) < 6:
+                    world.cast_ability(hero=hero, ability=hero.get_ability(Model.AbilityName.BLASTER_ATTACK), cell=enemy.current_cell)
+        # for hero in world.my_heroes:
+        # no = 0
+        # for hero in world.my_heroes:
+        #     world.cast_ability(hero=hero, ability=hero.get_ability(Model.AbilityName.BLASTER_BOMB), cell=self.attack_targets[no])
+        #     world.cast_ability(hero=hero, ability=hero.get_ability(Model.AbilityName.BLASTER_ATTACK), cell=self.attack_targets[no])
+        #     no = no + 1
