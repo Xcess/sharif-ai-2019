@@ -12,7 +12,7 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/AI.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-413">
+            <state relative-caret-position="-5">
               <caret line="43" column="17" lean-forward="true" selection-start-line="43" selection-start-column="17" selection-end-line="43" selection-end-column="17" />
             </state>
           </provider>
@@ -38,7 +38,7 @@
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="-147" />
     <option name="y" value="-13" />
     <option name="width" value="1750" />
