@@ -85,13 +85,13 @@ class AI:
 
     def action(self, world):
         for hero in world.my_heroes:
-            if hero.hero_name == Model.HeroName.SENTRY :
+            if hero.name == Model.HeroName.SENTRY :
                 for enemy in world.opp_heroes:
                     # if world.manhattan_distance(hero.current_cell, enemy.current_cell) < 8:
                         world.cast_ability(hero=hero, ability=hero.get_ability(Model.AbilityName.SENTRY_RAY), cell=enemy.current_cell)
                     # if world.manhattan_distance(hero.current_cell, enemy.current_cell) < 6:
                     #     world.cast_ability(hero=hero, ability=hero.get_ability(Model.AbilityName.BLASTER_ATTACK), cell=enemy.current_cell)
-            if hero.HeroName== Model.HeroName.BLASTER:
+            if hero.name== Model.HeroName.BLASTER:
                  for enemy in world.opp_heroes:
                     if world.manhattan_distance(hero.current_cell, enemy.current_cell) < 8:
                         world.cast_ability(hero=hero, ability=hero.get_ability(Model.AbilityName.BLASTER_BOMB), cell=enemy.current_cell)
