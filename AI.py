@@ -25,24 +25,41 @@ class AI:
                 column_max = cell.column
             if cell.column < column_min:
                 column_min = cell.column 
-            # print("row_min")
-            # print(row_min)
-            # print("column_min")
-            # print(column_min)
-            # print("row_max")
-            # print(row_max)
-            # print("column_max")
-            # print(column_max)
+        # print("row_min")
+        # print(row_min)
+        # print("column_min")
+        # print(column_min)
+        # print("row_max")
+        # print(row_max)
+        # print("column_max")
+        # print(column_max)
+        world.map.my_respawn_zone
 
         self.final_posisions.append(world.map.get_cell(row_min,column_min))
         self.final_posisions.append(world.map.get_cell(row_min,column_max))
         self.final_posisions.append(world.map.get_cell(row_max,column_min))
         self.final_posisions.append (world.map.get_cell(row_max,column_max))
+        valid_flag = 0
+        while falid_flag = 0:
+            falid_flag = 1
+            for i in range(4):
+                if final_posisions[i].is_wall:
+                    falid_flag = 0
+                    row_change = 0
+                    column_change = 0
+                    if final_posisions[i].row > 15:
+                        row_change = 1
+                    else:
+                        row_change = -1
+                    if final_posisions[i].column > 15:
+                        column_change = 1
+                    else:
+                        column_change = -1
+                    final_posisions[i] = world.map.get_cell(final_posisions[i].row+row_change,final_posisions[i].rowcolumn+column_change)
 
-        self.attack_targets.append(world.map.get_cell(row_min+2,column_min+2))
-        self.attack_targets.append(world.map.get_cell(row_min+2,column_max-2))
-        self.attack_targets.append(world.map.get_cell(row_max-2,column_min+2))
-        self.attack_targets.append (world.map.get_cell(row_max-2,column_max-2))
+
+
+
     def pick(self, world):
         print("pick")
         # hero_names = [hero_name for hero_name in Model.HeroName]  
@@ -50,7 +67,10 @@ class AI:
 
     def move(self, world):
         #print("move")
-        dirs = [direction for direction in Model.Direction]
+        for hero in world.my_heroes:
+            if not hero.current_cell.is_in_objective_zone:
+                pass
+
         no = 0
         for hero in world.my_heroes:    
             
