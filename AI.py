@@ -9,9 +9,11 @@ class AI:
                 Model.HeroName.BLASTER,
                 Model.HeroName.BLASTER]
     final_posisions = []
-    attack_targets = []
+    nearest_obj = []
+    hero_list = []
     def preprocess(self, world):
         print("preprocess")
+        print (world.map.my_respawn_zone)
         row_min = 100
         column_min = 100
         row_max = 0
@@ -33,7 +35,17 @@ class AI:
         # print(row_max)
         # print("column_max")
         # print(column_max)
-        world.map.my_respawn_zone
+        no = 0
+        for cell in world.map.my_respawn_zone:
+            dist = 1000
+            for target in world.map.objective_zone:
+                if len(world.get_path_move_directions(start_cell = cell, end_cell = target)) < dist:
+                    dist = len(world.get_path_move_directions(start_cell = cell, end_cell = target))
+                    if len(self.nearest_obj)>no:
+                        self.nearest_obj[no] = target
+                    else:
+                        self.nearest_obj.append(target)
+            no = no + 1
 
         self.final_posisions.append(world.map.get_cell(row_min,column_min))
         self.final_posisions.append(world.map.get_cell(row_min,column_max))
@@ -67,14 +79,23 @@ class AI:
         world.pick_hero(self.pick_heros.pop(0))
 
     def move(self, world):
+        print (world.map.my_respawn_zone)
         #print("move")
-        for hero in world.my_heroes:
+        if len (self.hero_list) < 4:
+            for cell in world.map.my_respawn_zone:
+                for hero in world.my_heroes:
+                    if hero.current_cell == cell:
+                       self.hero_list.append(hero.id) 
+        no = 0
+        for heroid in self.hero_list:
+            hero = world.get_hero(heroid)
             if not hero.current_cell.is_in_objective_zone:
-                pass
+                path_to_mid = world.get_path_move_directions(start_cell = hero.current_cell, end_cell = self.nearest_obj[no])
+            no = no + 1
 
         no = 0
-        for hero in world.my_heroes:    
-            
+        for heroid in self.hero_list:    
+            hero = world.get_hero(heroid)
             if hero.current_cell != self.final_posisions[no]:
                 other_cells = []
                 for i in range(4):
@@ -86,7 +107,8 @@ class AI:
             no = no + 1
 
     def action(self, world):
-        for hero in world.my_heroes:
+        for heroid in self.hero_list:
+            hero = world.get_hero(heroid)
             for enemy in world.opp_heroes:
                 if world.manhattan_distance(hero.current_cell, enemy.current_cell) < 8:
                     world.cast_ability(hero=hero, ability=hero.get_ability(Model.AbilityName.BLASTER_BOMB), cell=enemy.current_cell)
