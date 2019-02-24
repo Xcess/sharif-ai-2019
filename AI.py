@@ -11,6 +11,7 @@ class AI:
     final_posisions = [[],[],[]]
     nearest_obj = []
     hero_list = []
+    reached_final_pos = [0,0,0,0]
     def get_dodge_cell(self, world, hero):
         target_cell = hero.current_cell
         for cell in world.get_cells_in_aoe(hero.current_cell,3):
@@ -105,6 +106,11 @@ class AI:
         world.pick_hero(self.pick_heros.pop(0))
 
     def move(self, world):
+
+        for num, heroid in enumerate(self.hero_list):
+            hero = world.get_hero(heroid)
+            if hero.current_hp <= 0:
+                self.reached_final_pos[num] = 0
         #list heroes
         hero_move_flag = [0,0,0,0]
         if len (self.hero_list) < 4:
@@ -127,7 +133,7 @@ class AI:
             hero = world.get_hero(heroid)
             nearest_enemy_cell = self.get_nearest_enemy_cell(world,hero)
 
-            if 5 < world.manhattan_distance(hero.current_cell, nearest_enemy_cell) and nearest_enemy_cell.is_in_objective_zone and world.manhattan_distance(hero.current_cell,self.get_nearest_ally_cell(world,hero)) > 3:
+            if self.reached_final_pos[num] == 1 and 5 < world.manhattan_distance(hero.current_cell, nearest_enemy_cell) and nearest_enemy_cell.is_in_objective_zone and world.manhattan_distance(hero.current_cell,self.get_nearest_ally_cell(world,hero)) > 3:
                 path_to_mid = world.get_path_move_directions(start_cell = hero.current_cell, end_cell = nearest_enemy_cell)
                 if path_to_mid:
                     world.move_hero(hero=hero, direction=path_to_mid[0])
@@ -142,14 +148,18 @@ class AI:
                 continue 
             if hero.current_cell != self.final_posisions[0][num]:
                 other_cells = []
-                for i in range(4):
-                    if i != num:
-                        other_cells.append(self.final_posisions[0][i])
+                for num2, heroid2 in enumerate(self.hero_list):
+                    hero2 = world.get_hero(heroid2)
+                    if num != num2:
+                        other_cells.append(self.final_posisions[0][num2])
+                        if self.reached_final_pos[num2]:
+                            other_cells.append(hero2.current_cell)
                 path_to_mid = world.get_path_move_directions(start_cell = hero.current_cell, end_cell = self.final_posisions[0][num], not_pass=other_cells)
                 nearest_enemy_cell = self.get_nearest_enemy_cell(world,hero)
-                if path_to_mid and (world.manhattan_distance(world._get_next_cell(hero.current_cell,path_to_mid[0]), nearest_enemy_cell) <= world.manhattan_distance(hero.current_cell, nearest_enemy_cell) or not hero.current_cell.is_in_objective_zone ):
+                if (path_to_mid and self.reached_final_pos[num] == 0) or (path_to_mid and (world.manhattan_distance(world._get_next_cell(hero.current_cell,path_to_mid[0]), nearest_enemy_cell) <= world.manhattan_distance(hero.current_cell, nearest_enemy_cell) or not hero.current_cell.is_in_objective_zone )):
                     world.move_hero(hero=hero, direction=path_to_mid[0])
-
+            else:
+                self.reached_final_pos[num] = 1
     def action(self, world):
         for heroid in self.hero_list:
             hero = world.get_hero(heroid)
