@@ -11,9 +11,17 @@ class AI:
     final_posisions = []
     nearest_obj = []
     hero_list = []
+    def get_dodge_cell(self, world, hero):
+        target_cell = hero.current_cell
+        for cell in world.get_cells_in_aoe(hero.current_cell,4):
+            if len(world.get_path_move_directions(start_cell = cell, end_cell = self.final_posisions[self.hero_list.index(hero.id)])) < len(world.get_path_move_directions(start_cell = target_cell, end_cell = self.final_posisions[self.hero_list.index(hero.id)])) and not cell.is_wall:
+                target_cell = cell
+        return target_cell
+
+
     def preprocess(self, world):
         print("preprocess")
-        print (world.map.my_respawn_zone)
+        #print (world.map.my_respawn_zone)
         row_min = 100
         column_min = 100
         row_max = 0
@@ -35,17 +43,16 @@ class AI:
         # print(row_max)
         # print("column_max")
         # print(column_max)
-        no = 0
-        for cell in world.map.my_respawn_zone:
+        for num, cell in enumerate(world.map.my_respawn_zone):
             dist = 1000
             for target in world.map.objective_zone:
                 if len(world.get_path_move_directions(start_cell = cell, end_cell = target)) < dist:
                     dist = len(world.get_path_move_directions(start_cell = cell, end_cell = target))
-                    if len(self.nearest_obj)>no:
-                        self.nearest_obj[no] = target
+                    if len(self.nearest_obj)>num:
+                        self.nearest_obj[num] = target
                     else:
                         self.nearest_obj.append(target)
-            no = no + 1
+            print("nearest_obj to cell ({},{}) is ({},{}) , num = {}".format(cell.row,cell.column,self.nearest_obj[num].row, self.nearest_obj[num].column,num))
 
         self.final_posisions.append(world.map.get_cell(row_min,column_min))
         self.final_posisions.append(world.map.get_cell(row_min,column_max))
@@ -79,32 +86,30 @@ class AI:
         world.pick_hero(self.pick_heros.pop(0))
 
     def move(self, world):
-        print (world.map.my_respawn_zone)
+        #print (world.map.my_respawn_zone)
         #print("move")
         if len (self.hero_list) < 4:
             for cell in world.map.my_respawn_zone:
                 for hero in world.my_heroes:
                     if hero.current_cell == cell:
                        self.hero_list.append(hero.id) 
-        no = 0
-        for heroid in self.hero_list:
+        for num, heroid in enumerate(self.hero_list):
             hero = world.get_hero(heroid)
             if not hero.current_cell.is_in_objective_zone:
-                path_to_mid = world.get_path_move_directions(start_cell = hero.current_cell, end_cell = self.nearest_obj[no])
-            no = no + 1
-
-        no = 0
-        for heroid in self.hero_list:    
-            hero = world.get_hero(heroid)
-            if hero.current_cell != self.final_posisions[no]:
-                other_cells = []
-                for i in range(4):
-                    if i != no:
-                        other_cells.append(self.final_posisions[i])
-                path_to_mid = world.get_path_move_directions(start_cell = hero.current_cell, end_cell = self.final_posisions[no], not_pass=other_cells)
+                path_to_mid = world.get_path_move_directions(start_cell = hero.current_cell, end_cell = self.nearest_obj[num])
                 if path_to_mid:
                     world.move_hero(hero=hero, direction=path_to_mid[0])
-            no = no + 1
+
+        for num, heroid in enumerate(self.hero_list):    
+            hero = world.get_hero(heroid)
+            if hero.current_cell != self.final_posisions[num]:
+                other_cells = []
+                for i in range(4):
+                    if i != num:
+                        other_cells.append(self.final_posisions[i])
+                path_to_mid = world.get_path_move_directions(start_cell = hero.current_cell, end_cell = self.final_posisions[num], not_pass=other_cells)
+                if path_to_mid:
+                    world.move_hero(hero=hero, direction=path_to_mid[0])
 
     def action(self, world):
         for heroid in self.hero_list:
@@ -112,11 +117,16 @@ class AI:
             for enemy in world.opp_heroes:
                 if world.manhattan_distance(hero.current_cell, enemy.current_cell) < 8:
                     world.cast_ability(hero=hero, ability=hero.get_ability(Model.AbilityName.BLASTER_BOMB), cell=enemy.current_cell)
+                    action_flag = 1
                 if world.manhattan_distance(hero.current_cell, enemy.current_cell) < 6:
                     world.cast_ability(hero=hero, ability=hero.get_ability(Model.AbilityName.BLASTER_ATTACK), cell=enemy.current_cell)
-        # for hero in world.my_heroes:
-        # no = 0
-        # for hero in world.my_heroes:
-        #     world.cast_ability(hero=hero, ability=hero.get_ability(Model.AbilityName.BLASTER_BOMB), cell=self.attack_targets[no])
-        #     world.cast_ability(hero=hero, ability=hero.get_ability(Model.AbilityName.BLASTER_ATTACK), cell=self.attack_targets[no])
-        #     no = no + 1
+                    action_flag = 1
+
+        for num, heroid in enumerate(self.hero_list):
+            hero = world.get_hero(heroid)
+            if hero.current_cell != self.final_posisions[num]:
+                print("hero pos isnt final")
+                #target_cell = self.get_dodge_cell(world,hero)
+                target_cell = world.map.get_cell(hero.current_cell.row+4, hero.current_cell.column)
+                #print("dodge {} from ({},{}) to ({},{})".format(heroid, hero.current_cell.row, hero.current_cell.column, target_cell.row, target_cell.column))
+                world.cast_ability(hero=hero, ability=hero.get_ability(Model.AbilityName.BLASTER_DODGE), cell=target_cell)
