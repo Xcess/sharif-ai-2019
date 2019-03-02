@@ -103,11 +103,11 @@ class AI:
             for i in range(4):
                 row_change = 0
                 column_change = 0
-                if self.final_posisions[j][i].row < 15:
+                if self.final_posisions[j][i].row < (row_min+row_max)/2:
                     row_change = 1
                 else:
                     row_change = -1
-                if self.final_posisions[j][i].column < 15:
+                if self.final_posisions[j][i].column < (column_min+column_max)/2:
                     column_change = 1
                 else:
                     column_change = -1
