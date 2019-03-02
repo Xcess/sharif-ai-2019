@@ -11,6 +11,7 @@ class AI:
     final_posisions = [[],[],[]]
     nearest_obj = []
     hero_list = []
+    used_dodge_cells = []
     reached_final_pos = [0,0,0,0]
 
     def get_direction_cell(self, world, current_cell, path, length):
@@ -24,7 +25,7 @@ class AI:
     def get_dodge_cell(self, world, hero):
         target_cell = hero.current_cell
         for cell in world.get_cells_in_aoe(hero.current_cell,4):
-            if len(world.get_path_move_directions(start_cell = cell, end_cell = self.nearest_obj[self.hero_list.index(hero.id)])) < len(world.get_path_move_directions(start_cell = target_cell, end_cell = self.nearest_obj[self.hero_list.index(hero.id)])) and not cell.is_wall:
+            if world.manhattan_distance(cell, self.nearest_obj[self.hero_list.index(hero.id)]) < world.manhattan_distance( target_cell, self.nearest_obj[self.hero_list.index(hero.id)]) and not cell.is_wall and cell not in self.used_dodge_cells:
                 target_cell = cell
         return target_cell
 
@@ -192,6 +193,7 @@ class AI:
             else:
                 self.reached_final_pos[num] = 1
     def action(self, world):
+        self.used_dodge_cells = []
         for heroid in self.hero_list:
             hero = world.get_hero(heroid)
             target_cell = self.get_lowest_in_range_cell(world,hero,8)
@@ -206,4 +208,6 @@ class AI:
             # if hero.current_cell != self.final_posisions[0][num]:
             if not hero.current_cell.is_in_objective_zone:
                 target_cell = self.get_dodge_cell(world,hero)
-                world.cast_ability(hero=hero, ability=hero.get_ability(Model.AbilityName.BLASTER_DODGE), cell=target_cell)
+                if target_cell and target_cell != world.map.get_cell(-1,-1):
+                    self.used_dodge_cells.append(target_cell)
+                    world.cast_ability(hero=hero, ability=hero.get_ability(Model.AbilityName.BLASTER_DODGE), cell=target_cell)
