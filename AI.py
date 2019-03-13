@@ -50,11 +50,11 @@ class AI:
                 nearest_ally_cell = ally.current_cell
         return nearest_ally_cell
 
-    def get_lowest_in_range_cell(self,world,hero,range):
+    def get_lowest_in_range_cell(self,world,hero,hero_range):
         lowest_in_range_cell = world.map.get_cell(-1,-1)
         lowest_hp = 1000
         for enemy in world.opp_heroes:
-            if world.manhattan_distance(hero.current_cell, enemy.current_cell) < range and enemy.current_hp < lowest_hp and enemy.current_cell not in self.attacking:
+            if world.manhattan_distance(hero.current_cell, enemy.current_cell) < hero_range and enemy.current_hp < lowest_hp and enemy.current_cell not in self.attacking:
                 lowest_hp = enemy.current_hp
                 lowest_in_range_cell = enemy.current_cell
         return lowest_in_range_cell
@@ -87,6 +87,10 @@ class AI:
 
         for c in self.not_pass_objective_zone:
             print("({},{})".format(c.row, c.column))
+
+        #constants
+        self.blaster_range = {"bomb" : 8 , "attack" : 5}
+
         # print("row_min")
         # print(row_min)
         # print("column_min")
@@ -207,12 +211,6 @@ class AI:
                 if path_to_mid and hero_dodge_flag[num] == 0:
                     world.move_hero(hero=hero, direction=path_to_mid[0])
                     
-                        
-
-
-
-
-
 
         #check for proper position to attack
         for num, heroid in enumerate(self.hero_list):
@@ -254,10 +252,10 @@ class AI:
         self.used_dodge_cells = []
         for heroid in self.hero_list:
             hero = world.get_hero(heroid)
-            target_cell = self.get_lowest_in_range_cell(world,hero,8)
+            target_cell = self.get_lowest_in_range_cell(world,hero, self.blaster_range["bomb"])
             if target_cell and target_cell != world.map.get_cell(-1,-1):
                 world.cast_ability(hero=hero, ability=hero.get_ability(Model.AbilityName.BLASTER_BOMB), cell=target_cell)
-            target_cell = self.get_lowest_in_range_cell(world,hero,6)
+            target_cell = self.get_lowest_in_range_cell(world,hero, self.blaster_range["attack"])
             if world._get_opp_hero(target_cell) and world._get_opp_hero(target_cell).current_hp < 40 and hero.get_ability(Model.AbilityName.BLASTER_BOMB).is_ready(): 
                     self.attacking.append(target_cell)
                     continue
