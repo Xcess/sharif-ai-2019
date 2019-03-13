@@ -1,6 +1,7 @@
 
 import Model
 from random import randint
+import itertools
 
 
 class AI:
@@ -68,6 +69,15 @@ class AI:
                 lowest_in_range_cell = enemy.current_cell
         return lowest_in_range_cell
 
+    def get_multi_attack_cell(self, world, hero, hero_range, hero_aoe):
+        opp_comb = itertools.combinations(world.opp_heroes, 2)
+        comb_dist = {}
+        for comb in opp_comb:
+            comb_dist[world.manhattan_distance(comb[0].current_cell, comb[1].current_cell)] = comb
+        candidate_pair_dist = sorted(comb_dist)[0]
+        if candidate_pair_dist <= hero_aoe:
+            mtarget_row = int((comb_dist[candidate_pair_dist][0].get_cell.row + comb_dist[candidate_pair_dist][1].get_cell.row) / 2)
+            mtarget_column = int((comb_dist[candidate_pair_dist][0].get_cell.column + comb_dist[candidate_pair_dist][1].get_cell.column) / 2)
 
 
     def preprocess(self, world):
