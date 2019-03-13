@@ -260,7 +260,11 @@ class AI:
             if world._get_opp_hero(target_cell) and world._get_opp_hero(target_cell).current_hp < 35 and hero.get_ability(Model.AbilityName.BLASTER_BOMB).is_ready(): 
                     self.attacking.append(target_cell)
                     continue
-            if target_cell and target_cell != world.map.get_cell(-1,-1):
+            impact_cells = world.get_impact_cells(hero.get_ability(Model.AbilityName.BLASTER_ATTACK), hero.current_cell, target_cell)
+            for c in impact_cells:
+                print("({},{})".format(c.row, c.column))
+
+            if target_cell and target_cell != world.map.get_cell(-1,-1) and target_cell in impact_cells:
                 world.cast_ability(hero=hero, ability=hero.get_ability(Model.AbilityName.BLASTER_ATTACK), cell=target_cell)
                 if world._get_opp_hero(target_cell) and world._get_opp_hero(target_cell).current_hp < 20: 
                     self.attacking.append(target_cell)
