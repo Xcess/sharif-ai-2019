@@ -24,6 +24,15 @@ class AI:
             cell = world._get_next_cell(cell,path[i])
         return cell           
 
+    def get_dead_hero_count(self, world):
+        count = 0
+        for num, heroid in enumerate(self.hero_list):
+            hero = world.get_hero(heroid)
+            if hero.current_hp <= 0:
+                count += 1
+        print(count)
+        return count
+
     def get_dodge_cell(self, world, hero):
         target_cell = hero.current_cell
         for cell in world.get_cells_in_aoe(hero.current_cell,4):
@@ -198,8 +207,9 @@ class AI:
                         pass
                         #world.move_hero(hero=hero, direction=path_to_mid[0])
                     else:
-                        hero_dodge_flag[num] = 1
-                        fix_cells.append(hero.current_cell)
+                        if self.get_dead_hero_count(world) > 0:
+                            hero_dodge_flag[num] = 1
+                            fix_cells.append(hero.current_cell)
 
 
         # copy
