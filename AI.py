@@ -13,6 +13,7 @@ class AI:
     hero_list = []
     used_dodge_cells = []
     reached_final_pos = [0,0,0,0]
+    not_pass_objective_zone = []
 
     def get_direction_cell(self, world, current_cell, path, length):
         cell = current_cell
@@ -76,6 +77,12 @@ class AI:
                 column_max = cell.column
             if cell.column < column_min:
                 column_min = cell.column 
+
+        for i in range(row_min, row_max):
+            for j in range(column_min, column_max):
+                cell = world.get_cell(i, j)
+                if not cell.is_in_objective_zone:
+                    self.not_pass_objective_zone.append(cell)
         # print("row_min")
         # print(row_min)
         # print("column_min")
@@ -186,6 +193,7 @@ class AI:
                         other_cells.append(self.final_posisions[0][num2])
                         if self.reached_final_pos[num2]:
                             other_cells.append(hero2.current_cell)
+                other_cells = other_cells + not_pass_objective_zone
                 path_to_mid = world.get_path_move_directions(start_cell = hero.current_cell, end_cell = self.final_posisions[0][num], not_pass=other_cells)
                 nearest_enemy_cell = self.get_nearest_enemy_cell(world,hero)
                 if (path_to_mid and self.reached_final_pos[num] == 0 and hero_dodge_flag[num] == 0) or (hero_dodge_flag[num] == 0 and path_to_mid and (world.manhattan_distance(world._get_next_cell(hero.current_cell,path_to_mid[0]), nearest_enemy_cell) <= world.manhattan_distance(hero.current_cell, nearest_enemy_cell) or not hero.current_cell.is_in_objective_zone )):
