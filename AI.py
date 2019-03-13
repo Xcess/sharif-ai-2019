@@ -238,7 +238,8 @@ class AI:
                         other_cells.append(self.final_posisions[0][num2])
                         if self.reached_final_pos[num2]:
                             other_cells.append(hero2.current_cell)
-                other_cells = other_cells + self.not_pass_objective_zone
+                if hero.current_cell.is_in_objective_zone:
+                    other_cells = other_cells + self.not_pass_objective_zone
                 path_to_mid = world.get_path_move_directions(start_cell = hero.current_cell, end_cell = self.final_posisions[0][num], not_pass=other_cells)
                 if hero.current_cell.is_in_objective_zone and not world._get_next_cell(hero.current_cell, path_to_mid[0]).is_in_objective_zone:
                     hero_dodge_flag[num] = 1
