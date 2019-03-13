@@ -257,7 +257,7 @@ class AI:
             if target_cell and target_cell != world.map.get_cell(-1,-1):
                 world.cast_ability(hero=hero, ability=hero.get_ability(Model.AbilityName.BLASTER_BOMB), cell=target_cell)
             target_cell = self.get_lowest_in_range_cell(world,hero, self.blaster_range["attack"])
-            if world._get_opp_hero(target_cell) and world._get_opp_hero(target_cell).current_hp < 40 and hero.get_ability(Model.AbilityName.BLASTER_BOMB).is_ready(): 
+            if world._get_opp_hero(target_cell) and world._get_opp_hero(target_cell).current_hp < 35 and hero.get_ability(Model.AbilityName.BLASTER_BOMB).is_ready(): 
                     self.attacking.append(target_cell)
                     continue
             if target_cell and target_cell != world.map.get_cell(-1,-1):
