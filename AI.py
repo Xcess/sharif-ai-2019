@@ -242,6 +242,8 @@ class AI:
                             other_cells.append(hero2.current_cell)
                 other_cells = other_cells + self.not_pass_objective_zone
                 path_to_mid = world.get_path_move_directions(start_cell = hero.current_cell, end_cell = self.final_posisions[0][num], not_pass=other_cells)
+                if hero.current_cell.is_in_objective_zone and not world._get_next_cell(hero.current_cell, path_to_mid[0]).is_in_objective_zone:
+                    hero_dodge_flag[num] = 1
                 nearest_enemy_cell = self.get_nearest_enemy_cell(world,hero)
                 if (path_to_mid and self.reached_final_pos[num] == 0 and hero_dodge_flag[num] == 0) or (hero_dodge_flag[num] == 0 and path_to_mid and (world.manhattan_distance(world._get_next_cell(hero.current_cell,path_to_mid[0]), nearest_enemy_cell) <= world.manhattan_distance(hero.current_cell, nearest_enemy_cell) or not hero.current_cell.is_in_objective_zone )):
                     world.move_hero(hero=hero, direction=path_to_mid[0])
