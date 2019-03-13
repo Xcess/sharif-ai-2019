@@ -79,8 +79,8 @@ class AI:
             if cell.column < column_min:
                 column_min = cell.column 
 
-        for i in range(row_min, row_max):
-            for j in range(column_min, column_max):
+        for i in range(row_min, row_max + 1):
+            for j in range(column_min, column_max + 1):
                 cell = world.map.get_cell(i, j)
                 if not cell.is_in_objective_zone:
                     self.not_pass_objective_zone.append(cell)
