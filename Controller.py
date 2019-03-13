@@ -26,7 +26,7 @@ class Controller:
     def start(self):
         self.read_settings()
         self.network = Network(ip=self.conf[self.argNames[0]],
-                               port=self.conf[self.argNames[1]],
+                               port=int(self.conf[self.argNames[1]]),
                                token=self.conf[self.argNames[2]],
                                message_handler=self.handle_message)
         self.network.connect()
@@ -85,7 +85,10 @@ class Controller:
             self.terminate()
 
     def launch_on_thread(self, action, name, new_world, args):
-        action(new_world)
+        try:
+            action(new_world)
+        except Exception as e:
+            print(e)
         new_world.queue.put(Event(name + '-end', args))
 
 
