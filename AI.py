@@ -31,7 +31,7 @@ class AI:
             hero = world.get_hero(heroid)
             if hero.current_hp <= 0:
                 count += 1
-        print(count)
+        # print(count)
         return count
 
     def get_dodge_cell(self, world, hero):
@@ -83,8 +83,15 @@ class AI:
         except:
             cell = None
 
+        if cell != world.map.get_cell(-1,-1):
+            print("MATTACK : hero1 -> {},{} / hero2 -> {},{} / mtarget -> {},{} \n".format(
+                comb_dist[candidate_pair_dist][0].current_cell.row,
+                 comb_dist[candidate_pair_dist][0].current_cell.column,
+                  comb_dist[candidate_pair_dist][1].current_cell.row,
+                   comb_dist[candidate_pair_dist][1].current_cell.column,
+                    mtarget_row, mtarget_column))
+        return cell
 
-        return cell    
 
 
     def preprocess(self, world):
@@ -111,11 +118,13 @@ class AI:
                 if not cell.is_in_objective_zone:
                     self.not_pass_objective_zone.append(cell)
 
+        print("*" * 10, "objzone notpass", "*" * 10)
         for c in self.not_pass_objective_zone:
             print("({},{})".format(c.row, c.column))
+        print("*" * 30)
 
         #constants
-        self.blaster_range = {"bomb" : 8 , "attack" : 5,"aoe" :2}
+        self.blaster_range = {"bomb" : 19 , "attack" : 0, "bomb_aoe" : 3}
 
         # print("row_min")
         # print(row_min)
@@ -225,7 +234,7 @@ class AI:
                         #world.move_hero(hero=hero, direction=path_to_mid[0])
                     else:
                         if not self.get_dead_hero_count(world) > 0:
-                            hero_dodge_flag[num] = 1
+                            # hero_dodge_flag[num] = 1
                             fix_cells.append(hero.current_cell)
 
 
@@ -253,8 +262,18 @@ class AI:
 
 
         #go to final posision
+
         for num, heroid in enumerate(self.hero_list):
             hero = world.get_hero(heroid)
+
+            final_pos_do_move = False
+            for h in [h for h in world.my_heroes if h != hero]:
+                if world.manhattan_distance(hero.current_cell, h.current_cell) <= 2 * self.blaster_range["bomb_aoe"]:
+                    final_pos_do_move = True
+
+            if not final_pos_do_move:
+                self.reached_final_pos[num] = 1
+                continue
             if hero_move_flag[num] == 1: 
                 continue
             if hero.current_cell != self.final_posisions[0][num]:
@@ -275,6 +294,7 @@ class AI:
                     world.move_hero(hero=hero, direction=path_to_mid[0])
             else:
                 self.reached_final_pos[num] = 1
+
     def action(self, world):
         self.attacking = []
         self.used_dodge_cells = []
@@ -283,10 +303,9 @@ class AI:
         for heroid in self.hero_list:
             hero = world.get_hero(heroid)
 
-            mcell=self.get_multi_attack_cell(world,hero,self.blaster_range["bomb"],self.blaster_range["aoe"])
+            mcell=self.get_multi_attack_cell(world,hero,self.blaster_range["bomb"],self.blaster_range["bomb_aoe"])
             if mcell and mcell != world.map.get_cell(-1,-1): 
                 world.cast_ability(hero=hero, ability=hero.get_ability(Model.AbilityName.BLASTER_BOMB), cell=mcell)
-                print ("mattack",mcell.row,mcell.column)
 
         
             target_cell = self.get_lowest_in_range_cell(world,hero, self.blaster_range["bomb"])
