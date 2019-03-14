@@ -16,6 +16,7 @@ class AI:
     attacking = []
     reached_final_pos = [0,0,0,0]
     not_pass_objective_zone = []
+    current_objective_target = []
 
     def get_direction_cell(self, world, current_cell, path, length):
         cell = current_cell
@@ -33,11 +34,16 @@ class AI:
                 count += 1
         # print(count)
         return count
+    def get_delta_aoe_cells(self, world, target_cell, aoe_min, aoe_max):
+        cell_aoe_max = world.get_cells_in_aoe(target_cell, aoe_max)
+        cell_aoe_min = world.get_cells_in_aoe(target_cell, aoe_min)
+        delta_cells = [c for c in list(set(cell_aoe_max) - set(cell_aoe_min)) if not (c.is_wall or not c.is_in_objective_zone)]
+        return delta_cells
 
     def get_dodge_cell(self, world, hero):
         target_cell = hero.current_cell
         for cell in world.get_cells_in_aoe(hero.current_cell,4):
-            if world.manhattan_distance(cell, self.nearest_obj[self.hero_list.index(hero.id)]) < world.manhattan_distance( target_cell, self.nearest_obj[self.hero_list.index(hero.id)]) and not cell.is_wall and cell not in self.used_dodge_cells:
+            if world.manhattan_distance(cell, self.current_objective_target[self.hero_list.index(hero.id)]) < world.manhattan_distance( target_cell, self.current_objective_target[self.hero_list.index(hero.id)]) and not cell.is_wall and cell not in self.used_dodge_cells:
                 target_cell = cell
         return target_cell
 
@@ -83,8 +89,8 @@ class AI:
         except:
             cell = None
 
-        if cell != world.map.get_cell(-1,-1):
-            print("MATTACK : hero1 -> {},{} / hero2 -> {},{} / mtarget -> {},{} \n".format(
+        if cell and cell != world.map.get_cell(-1,-1):
+            print("MATTACK : hero1 -> {},{} / hero2 -> {},{} / mtarget -> {},{}".format(
                 comb_dist[candidate_pair_dist][0].current_cell.row,
                  comb_dist[candidate_pair_dist][0].current_cell.column,
                   comb_dist[candidate_pair_dist][1].current_cell.row,
@@ -121,7 +127,7 @@ class AI:
         print("*" * 10, "objzone notpass", "*" * 10)
         for c in self.not_pass_objective_zone:
             print("({},{})".format(c.row, c.column))
-        print("*" * 30)
+        print("*" * 35)
 
         #constants
         self.blaster_range = {"bomb" : 19 , "attack" : 0, "bomb_aoe" : 3}
@@ -144,10 +150,63 @@ class AI:
                     else:
                         self.nearest_obj.append(target)
 
+        # cell1
+        if world.manhattan_distance(self.nearest_obj[1], self.nearest_obj[0]) <= (self.blaster_range["bomb_aoe"] * 2) + 1 :
+            delta = self.get_delta_aoe_cells(world, self.nearest_obj[1],
+                0,
+                (self.blaster_range["bomb_aoe"] * 2) + 2)
+            cell0_aoe = world.get_cells_in_aoe(self.nearest_obj[0], (self.blaster_range["bomb_aoe"] * 2) + 1)
+            candid_cells = list(set(delta) - set(cell0_aoe))
+            dist = 1000
+            for c in candid_cells:
+                if len(world.get_path_move_directions(start_cell = world.map.my_respawn_zone[1], end_cell = c)) < dist:
+                    dist = len(world.get_path_move_directions(start_cell = world.map.my_respawn_zone[1], end_cell = c))
+                    self.nearest_obj[1] = c
+
+        # cell2
+        if world.manhattan_distance(self.nearest_obj[2], self.nearest_obj[0]) <= (self.blaster_range["bomb_aoe"] * 2) + 1 \
+        or world.manhattan_distance(self.nearest_obj[2], self.nearest_obj[1]) <= (self.blaster_range["bomb_aoe"] * 2) + 1:
+
+            delta = self.get_delta_aoe_cells(world, self.nearest_obj[2],
+                0,
+                (self.blaster_range["bomb_aoe"] * 2) + 2)
+            cell0_aoe = world.get_cells_in_aoe(self.nearest_obj[0], (self.blaster_range["bomb_aoe"] * 2) + 1)
+            cell1_aoe = world.get_cells_in_aoe(self.nearest_obj[1], (self.blaster_range["bomb_aoe"] * 2) + 1)
+
+            candid_cells = list(set(delta) - (set(cell0_aoe).union(set(cell1_aoe))))
+            dist = 1000
+            for c in candid_cells:
+                if len(world.get_path_move_directions(start_cell = world.map.my_respawn_zone[2], end_cell = c)) < dist:
+                    dist = len(world.get_path_move_directions(start_cell = world.map.my_respawn_zone[2], end_cell = c))
+                    self.nearest_obj[2] = c
+
+        # cell3
+        if world.manhattan_distance(self.nearest_obj[3], self.nearest_obj[0]) <= (self.blaster_range["bomb_aoe"] * 2) + 1 \
+            or world.manhattan_distance(self.nearest_obj[3], self.nearest_obj[1]) <= (self.blaster_range["bomb_aoe"] * 2) + 1 \
+            or world.manhattan_distance(self.nearest_obj[3], self.nearest_obj[2]) <= (self.blaster_range["bomb_aoe"] * 2) + 1:
+
+            delta = self.get_delta_aoe_cells(world, self.nearest_obj[3],
+                0,
+                (self.blaster_range["bomb_aoe"] * 2) + 2)
+            cell0_aoe = world.get_cells_in_aoe(self.nearest_obj[0], (self.blaster_range["bomb_aoe"] * 2) + 1)
+            cell1_aoe = world.get_cells_in_aoe(self.nearest_obj[1], (self.blaster_range["bomb_aoe"] * 2) + 1)
+            cell2_aoe = world.get_cells_in_aoe(self.nearest_obj[2], (self.blaster_range["bomb_aoe"] * 2) + 1)
+
+            candid_cells = list(set(delta) - (set(cell0_aoe).union(set(cell1_aoe)).union(set(cell2_aoe))))
+            dist = 1000
+            for c in candid_cells:
+                if len(world.get_path_move_directions(start_cell = world.map.my_respawn_zone[3], end_cell = c)) < dist:
+                    dist = len(world.get_path_move_directions(start_cell = world.map.my_respawn_zone[3], end_cell = c))
+                    self.nearest_obj[3] = c
+
+
+
         self.final_posisions[0].append(world.map.get_cell(row_min,column_min))
         self.final_posisions[0].append(world.map.get_cell(row_min,column_max))
         self.final_posisions[0].append(world.map.get_cell(row_max,column_min))
-        self.final_posisions[0].append (world.map.get_cell(row_max,column_max))
+        self.final_posisions[0].append(world.map.get_cell(row_max,column_max))
+
+
 
         for j in range(2):
             for i in range(4):
@@ -186,7 +245,10 @@ class AI:
                     if count > 30:
                         self.final_posisions[0][i] =world.map.objective_zone[randint(0, len(world.map.objective_zone) - 1)]
 
-            
+        self.current_objective_target.append(self.nearest_obj[0])
+        self.current_objective_target.append(self.nearest_obj[1])
+        self.current_objective_target.append(self.nearest_obj[2])
+        self.current_objective_target.append(self.nearest_obj[3])
         
             
         # while valid_flag == 0:
@@ -204,6 +266,19 @@ class AI:
         world.pick_hero(self.pick_heros.pop(0))
 
     def move(self, world):
+        for num, heroid in enumerate(self.hero_list):
+            hero = world.get_hero(heroid)
+            if hero.current_cell.is_in_my_respawn_zone:
+                self.current_objective_target[num] = self.nearest_obj[0]
+                dist = 1000
+                for cell in self.nearest_obj:
+                    comp_dist = world.get_path_move_directions(start_cell = hero.current_cell, end_cell = cell)
+                    if len(comp_dist) < dist:
+                        dist = len(comp_dist)
+                        self.current_objective_target[num] = cell
+                        self.final_posisions[0][num] = cell
+
+
 
         for num, heroid in enumerate(self.hero_list):
             hero = world.get_hero(heroid)
@@ -224,26 +299,26 @@ class AI:
         fix_cells = []
         for num, heroid in enumerate(self.hero_list):
             hero = world.get_hero(heroid)
-            if not hero.current_cell.is_in_objective_zone and world._get_my_hero(cell=self.nearest_obj[num]) == None:
-                path_to_mid = world.get_path_move_directions(start_cell = hero.current_cell, end_cell = self.nearest_obj[num])
+            if not hero.current_cell.is_in_objective_zone:
+                path_to_mid = world.get_path_move_directions(start_cell = hero.current_cell, end_cell = self.current_objective_target[num])
                 if path_to_mid:
                     dodge_cell = self.get_dodge_cell(world,hero)
-                    move_cell = self.get_direction_cell(world, hero.current_cell,path_to_mid,6)
-                    if (not hero.get_ability(Model.AbilityName.BLASTER_DODGE).is_ready()) or len(world.get_path_move_directions(start_cell = move_cell, end_cell = self.nearest_obj[num])) <= len(world.get_path_move_directions(start_cell = dodge_cell, end_cell = self.nearest_obj[num])):
-                        pass
-                        #world.move_hero(hero=hero, direction=path_to_mid[0])
-                    else:
-                        if not self.get_dead_hero_count(world) > 0:
-                            # hero_dodge_flag[num] = 1
-                            fix_cells.append(hero.current_cell)
+                    move_cell = self.get_direction_cell(world, hero.current_cell,path_to_mid, 6)
+                    # if (not hero.get_ability(Model.AbilityName.BLASTER_DODGE).is_ready()) or len(world.get_path_move_directions(start_cell = move_cell, end_cell = self.current_objective_target[num])) <= len(world.get_path_move_directions(start_cell = dodge_cell, end_cell = self.current_objective_target[num])):
+                    #     pass
+                    #     #world.move_hero(hero=hero, direction=path_to_mid[0])
+                    # else:
+                    if not self.get_dead_hero_count(world) > 0:
+                        # hero_dodge_flag[num] = 1
+                        fix_cells.append(hero.current_cell)
 
 
         # copy
 
         for num, heroid in enumerate(self.hero_list):
             hero = world.get_hero(heroid)
-            if not hero.current_cell.is_in_objective_zone and world._get_my_hero(cell=self.nearest_obj[num]) == None:
-                path_to_mid = world.get_path_move_directions(start_cell = hero.current_cell, end_cell = self.nearest_obj[num], not_pass = fix_cells)
+            if not hero.current_cell.is_in_objective_zone and world._get_my_hero(cell=self.current_objective_target[num]) == None:
+                path_to_mid = world.get_path_move_directions(start_cell = hero.current_cell, end_cell = self.current_objective_target[num], not_pass = fix_cells)
                 if path_to_mid and hero_dodge_flag[num] == 0:
                     world.move_hero(hero=hero, direction=path_to_mid[0])
                     
@@ -253,7 +328,7 @@ class AI:
             hero = world.get_hero(heroid)
             nearest_enemy_cell = self.get_nearest_enemy_cell(world,hero)
 
-            if self.reached_final_pos[num] == 1 and 5 < world.manhattan_distance(hero.current_cell, nearest_enemy_cell) and nearest_enemy_cell.is_in_objective_zone and world.manhattan_distance(hero.current_cell,self.get_nearest_ally_cell(world,hero)) > 3:
+            if self.reached_final_pos[num] == 1 and 19 < world.manhattan_distance(hero.current_cell, nearest_enemy_cell) and nearest_enemy_cell.is_in_objective_zone and world.manhattan_distance(hero.current_cell,self.get_nearest_ally_cell(world,hero)) > 7:
                 path_to_mid = world.get_path_move_directions(start_cell = hero.current_cell, end_cell = nearest_enemy_cell)
                 if path_to_mid:
                     world.move_hero(hero=hero, direction=path_to_mid[0])
@@ -268,10 +343,10 @@ class AI:
 
             final_pos_do_move = False
             for h in [h for h in world.my_heroes if h != hero]:
-                if world.manhattan_distance(hero.current_cell, h.current_cell) <= 2 * self.blaster_range["bomb_aoe"]:
+                if world.manhattan_distance(hero.current_cell, h.current_cell) < 2 * self.blaster_range["bomb_aoe"]:
                     final_pos_do_move = True
 
-            if not final_pos_do_move:
+            if not final_pos_do_move and hero.current_cell.is_in_objective_zone:
                 self.reached_final_pos[num] = 1
                 continue
             if hero_move_flag[num] == 1: 
