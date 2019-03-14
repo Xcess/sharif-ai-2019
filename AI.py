@@ -79,6 +79,10 @@ class AI:
             mtarget_row = int((comb_dist[candidate_pair_dist][0].get_cell.row + comb_dist[candidate_pair_dist][1].get_cell.row) / 2)
             mtarget_column = int((comb_dist[candidate_pair_dist][0].get_cell.column + comb_dist[candidate_pair_dist][1].get_cell.column) / 2)
 
+        cell = world.map.get_cell(mtarget_row,mtarget_column)
+
+        return cell    
+
 
     def preprocess(self, world):
         print("preprocess")
@@ -108,7 +112,7 @@ class AI:
             print("({},{})".format(c.row, c.column))
 
         #constants
-        self.blaster_range = {"bomb" : 8 , "attack" : 5}
+        self.blaster_range = {"bomb" : 8 , "attack" : 5,"aoe" :2}
 
         # print("row_min")
         # print(row_min)
@@ -271,8 +275,17 @@ class AI:
     def action(self, world):
         self.attacking = []
         self.used_dodge_cells = []
+
+
         for heroid in self.hero_list:
             hero = world.get_hero(heroid)
+
+            mcell=self.get_multi_attack_cell(world,hero,self.blaster_range["bomb"],self.blaster_range["aoe"])
+            if mcell and mcell != world.map.get_cell(-1,-1): 
+                world.cast_ability(hero=hero, ability=hero.get_ability(Model.AbilityName.BLASTER_BOMB), cell=mcell)
+                print ("mattack",mcell.row,mcell.column)
+
+        
             target_cell = self.get_lowest_in_range_cell(world,hero, self.blaster_range["bomb"])
             if target_cell and target_cell != world.map.get_cell(-1,-1):
                 world.cast_ability(hero=hero, ability=hero.get_ability(Model.AbilityName.BLASTER_BOMB), cell=target_cell)
