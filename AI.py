@@ -76,10 +76,13 @@ class AI:
             comb_dist[world.manhattan_distance(comb[0].current_cell, comb[1].current_cell)] = comb
         candidate_pair_dist = sorted(comb_dist)[0]
         if candidate_pair_dist <= hero_aoe:
-            mtarget_row = int((comb_dist[candidate_pair_dist][0].get_cell.row + comb_dist[candidate_pair_dist][1].get_cell.row) / 2)
-            mtarget_column = int((comb_dist[candidate_pair_dist][0].get_cell.column + comb_dist[candidate_pair_dist][1].get_cell.column) / 2)
+            mtarget_row = int((comb_dist[candidate_pair_dist][0].current_cell.row + comb_dist[candidate_pair_dist][1].current_cell.row) / 2)
+            mtarget_column = int((comb_dist[candidate_pair_dist][0].current_cell.column + comb_dist[candidate_pair_dist][1].current_cell.column) / 2)
+        try:
+            cell = world.map.get_cell(mtarget_row,mtarget_column)
+        except:
+            cell = None
 
-        cell = world.map.get_cell(mtarget_row,mtarget_column)
 
         return cell    
 
