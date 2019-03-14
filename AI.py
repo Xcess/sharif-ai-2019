@@ -75,7 +75,7 @@ class AI:
         for comb in opp_comb:
             comb_dist[world.manhattan_distance(comb[0].current_cell, comb[1].current_cell)] = comb
         candidate_pair_dist = sorted(comb_dist)[0]
-        if candidate_pair_dist <= hero_aoe:
+        if candidate_pair_dist <= hero_aoe * 2:
             mtarget_row = int((comb_dist[candidate_pair_dist][0].current_cell.row + comb_dist[candidate_pair_dist][1].current_cell.row) / 2)
             mtarget_column = int((comb_dist[candidate_pair_dist][0].current_cell.column + comb_dist[candidate_pair_dist][1].current_cell.column) / 2)
         try:
@@ -224,7 +224,7 @@ class AI:
                         pass
                         #world.move_hero(hero=hero, direction=path_to_mid[0])
                     else:
-                        if self.get_dead_hero_count(world) > 0:
+                        if not self.get_dead_hero_count(world) > 0:
                             hero_dodge_flag[num] = 1
                             fix_cells.append(hero.current_cell)
 
